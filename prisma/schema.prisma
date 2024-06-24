@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                 Int                @id @default(autoincrement())
+  username           String             @unique
+  passwordHash       String
+  email              String             @unique
+  nickname           String?
+  avatar             String?
+  contactInfo        String?
+  bio                String?
+  registeredAt       DateTime           @default(now())
+  lastLogin          DateTime           @default(now())
+  accountStatus      String             @default("active")
+  e5SubscriptionDate DateTime?
+  e5ExpirationDate   DateTime?
+  helpingUsers       String             @default("[]")
+  helpedUsers        String             @default("[]")
+  helpingByUsers     String             @default("[]")
+  helpedByUsers      String             @default("[]")
+  note               String?
+  userE5Post         UserE5Post?
+  userNotification   UserNotification?
+  usersE5SharedInfo  UsersE5SharedInfo?
+}
+
+model UserE5Post {
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  posts  String @default("[]")
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model UserNotification {
+  id            Int    @id @default(autoincrement())
+  userId        Int    @unique
+  notifications String @default("[]")
+  user          User   @relation(fields: [userId], references: [id])
+}
+
+model UsersE5SharedInfo {
+  id         Int    @id @default(autoincrement())
+  userId     Int    @unique
+  sharedInfo String @default("[]")
+  user       User   @relation(fields: [userId], references: [id])
+}
