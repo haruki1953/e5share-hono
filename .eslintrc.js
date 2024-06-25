@@ -21,5 +21,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module'
   },
-  rules: {}
+  rules: {
+    '@typescript-eslint/explicit-function-return-type': 'off'
+  }
 }
