@@ -18,6 +18,7 @@ router.post(
 
     await authRegisterUserService(username, password, email)
 
+    c.status(201)
     return c.json(handleResData(0, '注册成功'))
   }
 )
@@ -32,6 +33,7 @@ router.post(
 
     const token = await authLoginService(username, password, false)
 
+    c.status(200)
     return c.json(handleResData(0, '登录成功', undefined, token))
   }
 )
@@ -46,6 +48,7 @@ router.post(
 
     const token = await authLoginService(email, password, true)
 
+    c.status(200)
     return c.json(handleResData(0, '登录成功', undefined, token))
   }
 )

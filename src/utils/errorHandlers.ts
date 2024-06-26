@@ -22,12 +22,15 @@ export const handleGlobalError: Parameters<Hono['onError']>[0] = (error, c) => {
     c.status(error.statusCode ?? 500)
     return c.json(handleResData(1, error.message))
   }
+
   // handle HTTPException
   // for example: Malformed JSON in request body
   if (error instanceof HTTPException) {
+    console.log(error) // !!! for test
     c.status(error.status)
     return c.json(handleResData(1, error.message))
   }
+
   // unknown error
   c.status(500)
   return c.json(handleResData(1, `unknown error: ${error.message}`))
