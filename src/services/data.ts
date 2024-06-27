@@ -46,3 +46,15 @@ export const findUniqueUserByEmail = async (
   }
   return user
 }
+
+export const findUniqueUserById = async (
+  id: number
+) => {
+  const user = await prisma.user.findUnique({
+    where: { id }
+  })
+  if (user == null) {
+    throw new AppError('用户id不存在', 400)
+  }
+  return user
+}

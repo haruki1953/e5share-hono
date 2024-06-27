@@ -1,8 +1,9 @@
+import { AppError } from '@/classes/errors'
 import { jwtConfig } from '@/config'
 import { userUpdateProfileJson } from '@/schemas/user'
-import { userGetProfileSercive, userUpdateProfileService } from '@/services/user'
+import { userGetProfileSercive, userUpdateAvatarService, userUpdateProfileService } from '@/services/user'
 import { type UserJwtVariables } from '@/types/jwt'
-import { handleResData } from '@/utils/dataHandlers'
+import { handleFileInFromData, handleResData } from '@/utils/dataHandlers'
 import { zValWEH } from '@/utils/zValHandlers'
 import { Hono } from 'hono'
 import { jwt } from 'hono/jwt'
@@ -29,6 +30,23 @@ router.patch(
     } = c.req.valid('json')
 
     await userUpdateProfileService(id, nickname, contactInfo, bio)
+
+    c.status(200)
+    return c.json(handleResData(0, '修改成功'))
+  }
+)
+
+router.put(
+  '/avatar',
+  async (c) => {
+    const { id } = c.get('jwtPayload')
+    const formData = await c.req.formData().catch(() => {
+      throw new AppError('未上传表单')
+    })
+
+    const avatarBuffer = await handleFileInFromData(formData, 'avatar')
+
+    await userUpdateAvatarService(id, avatarBuffer)
 
     c.status(200)
     return c.json(handleResData(0, '修改成功'))

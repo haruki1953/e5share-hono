@@ -1,3 +1,4 @@
+import { AppError } from '@/classes/errors'
 import { type ResData } from '@/types/res'
 
 // handle response data
@@ -10,4 +11,14 @@ export const handleResData = (
     data,
     token
   }
+}
+
+export const handleFileInFromData = async (
+  fromData: FormData, fieldname: string
+) => {
+  const file = fromData.get(fieldname)
+  if (file == null || typeof file === 'string') {
+    throw new AppError('表单格式错误')
+  }
+  return await file.arrayBuffer()
 }

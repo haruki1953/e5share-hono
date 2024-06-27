@@ -1,5 +1,11 @@
 import { AppError } from '@/classes/errors'
+import { avatarConfig } from '@/config'
 import { prisma } from '@/utils/db'
+import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
+import fs from 'fs/promises'
+import Jimp from 'jimp'
+import { findUniqueUserById } from './data'
 
 export const userGetProfileSercive = async (id: number) => {
   const user = await prisma.user.findUnique({
@@ -47,5 +53,66 @@ export const userUpdateProfileService = async (
     }
   }).catch(() => {
     throw new AppError('修改失败')
+  })
+}
+
+// 确保保存文件的文件夹存在
+const confirmSaveFolderExists = async (dirPath: string) => {
+  try {
+    // 检查文件夹是否存在
+    await fs.access(dirPath)
+  } catch (err) {
+    await fs.mkdir(dirPath, { recursive: true }).catch(() => {
+      throw new AppError('保存目录错误', 500)
+    })
+  }
+}
+
+const processAvatar = async (
+  avatarBuffer: ArrayBuffer
+) => {
+  // info for save
+  // create uuid to serve as filename
+  const filename = uuidv4()
+  const saveFileName = `${filename}.jpg`
+  const saveFilePath = path.join(avatarConfig.savePath, saveFileName)
+
+  await confirmSaveFolderExists(avatarConfig.savePath)
+
+  try {
+    const inputImage = await Jimp.read(Buffer.from(avatarBuffer))
+
+    // resize and cover
+    inputImage.cover(avatarConfig.size, avatarConfig.size)
+
+    // save as jpg, and set quality
+    await inputImage.quality(avatarConfig.quality).writeAsync(saveFilePath)
+  } catch (err) {
+    // if error, try del saveFilePath
+    fs.unlink(saveFilePath).catch(() => {})
+    throw new AppError('图片处理失败')
+  }
+
+  return saveFileName
+}
+
+export const userUpdateAvatarService = async (
+  id: number, avatarBuffer: ArrayBuffer
+) => {
+  // process avatar (will save avatarfile)
+  const avatar = await processAvatar(avatarBuffer)
+
+  // delete old avatar
+  const user = await findUniqueUserById(id)
+  if (user.avatar != null) {
+    fs.unlink(path.join(avatarConfig.savePath, user.avatar)).catch(() => {})
+  }
+
+  // database update avatar
+  await prisma.user.update({
+    where: { id },
+    data: { avatar }
+  }).catch(() => {
+    throw new AppError('图片处理失败')
   })
 }
