@@ -1,11 +1,8 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import authRouter from '@/routers/auth'
-import publicRouter from '@/routers/public'
-import userRouter from '@/routers/user'
-import { handleResData } from './utils/dataHandlers'
-import { handleGlobalError } from './utils/errorHandlers'
+import { authRouter, publicRouter, userRouter } from './routers'
+import { handleResData, handleGlobalError } from './utils'
 
 const app = new Hono()
 
@@ -32,7 +29,6 @@ if (Number.isNaN(port)) {
 }
 
 console.log(`Server is running on port ${port}`)
-
 serve({
   fetch: app.fetch,
   port

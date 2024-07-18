@@ -1,5 +1,5 @@
 import { AppError } from '@/classes/errors'
-import { prisma } from '@/utils/db'
+import { prisma } from '@/system'
 
 export const confirmUsernameNotExists = async (
   username: string

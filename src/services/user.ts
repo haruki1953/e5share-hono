@@ -1,11 +1,12 @@
-import { AppError } from '@/classes/errors'
-import { avatarConfig } from '@/config'
-import { prisma } from '@/utils/db'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs/promises'
 import Jimp from 'jimp'
 import { findUniqueUserById } from './data'
+import { AppError } from '@/classes'
+import { avatarConfig } from '@/config/config'
+import { prisma } from '@/system'
+import { confirmSaveFolderExists } from '@/utils'
 
 export const userGetProfileSercive = async (id: number) => {
   const user = await prisma.user.findUnique({
@@ -56,18 +57,6 @@ export const userUpdateProfileService = async (
   })
 }
 
-// 确保保存文件的文件夹存在
-const confirmSaveFolderExists = async (dirPath: string) => {
-  try {
-    // 检查文件夹是否存在
-    await fs.access(dirPath)
-  } catch (err) {
-    await fs.mkdir(dirPath, { recursive: true }).catch(() => {
-      throw new AppError('保存目录错误', 500)
-    })
-  }
-}
-
 const processAvatar = async (
   avatarBuffer: ArrayBuffer
 ) => {
@@ -77,7 +66,7 @@ const processAvatar = async (
   const saveFileName = `${filename}.jpg`
   const saveFilePath = path.join(avatarConfig.savePath, saveFileName)
 
-  await confirmSaveFolderExists(avatarConfig.savePath)
+  confirmSaveFolderExists(avatarConfig.savePath)
 
   try {
     const inputImage = await Jimp.read(Buffer.from(avatarBuffer))

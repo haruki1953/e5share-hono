@@ -1,14 +1,19 @@
+import { AppError } from '@/classes'
+import { jwtConfig } from '@/config/config'
+import { prisma, useAdminSystem } from '@/system'
 import bcrypt from 'bcryptjs'
-import { AppError } from '@/classes/errors'
-import { prisma } from '@/utils/db'
-import { confirmEmailNotExists, confirmUsernameNotExists, findUniqueUserByEmail, findUniqueUserByUsername } from './data'
-import { type PromiseType } from '@prisma/client/extension'
-import { jwtConfig } from '@/config'
 import { sign } from 'hono/jwt'
+import { confirmUsernameNotExists, confirmEmailNotExists, findUniqueUserByUsername, findUniqueUserByEmail } from '.'
+import { type PromiseType } from '@prisma/client/extension'
+
+const adminSystem = useAdminSystem()
 
 export const authRegisterUserService = async (
   username: string, password: string, email: string
-): Promise<void> => {
+) => {
+  // confirm user could register
+  adminSystem.confirmCouldRegister()
+
   // confirm username is not existing
   await confirmUsernameNotExists(username)
 
@@ -60,7 +65,7 @@ const generateToken = async (
     username: user.username,
     exp: Math.floor(Date.now() / 1000) + jwtConfig.expSeconds
   }
-  const token = await sign(payload, jwtConfig.secretKey)
+  const token = await sign(payload, adminSystem.store.jwtMainSecretKey)
   return token
 }
 

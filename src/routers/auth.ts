@@ -1,11 +1,20 @@
 import { Hono } from 'hono'
-// import { zValidator } from '@hono/zod-validator'
-import { authEmailLoginJson, authRegisterJson, authUsernameLoginJson } from '@/schemas/user'
-import { zValWEH } from '@/utils/zValHandlers'
-import { handleResData } from '@/utils/dataHandlers'
-import { authLoginService, authRegisterUserService } from '@/services/auth'
+import { authEmailLoginJson, authRegisterJson, authUsernameLoginJson } from '@/schemas'
+import { authLoginService, authRegisterUserService } from '@/services'
+import { handleResData, zValWEH } from '@/utils'
+
+import { useAdminSystem } from '@/system'
+const adminSystem = useAdminSystem()
 
 const router = new Hono()
+
+// test
+router.get('/test', (c) => {
+  adminSystem.updateInfo(!adminSystem.store.couldRegister)
+
+  c.status(201)
+  return c.json(handleResData(0, `couldRegister: ${adminSystem.store.couldRegister}`))
+})
 
 router.post(
   '/register',

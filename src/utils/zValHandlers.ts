@@ -1,4 +1,4 @@
-import { AppError } from '@/classes/errors'
+import { AppError } from '@/classes'
 import { zValidator } from '@hono/zod-validator'
 
 // zValidator With Error Handler

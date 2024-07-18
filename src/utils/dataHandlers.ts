@@ -1,5 +1,5 @@
-import { AppError } from '@/classes/errors'
-import { type ResData } from '@/types/res'
+import { AppError } from '@/classes'
+import type { ResData } from '@/types'
 
 // handle response data
 export const handleResData = (

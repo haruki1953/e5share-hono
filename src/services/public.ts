@@ -1,5 +1,5 @@
-import { AppError } from '@/classes/errors'
-import { prisma } from '@/utils/db'
+import { AppError } from '@/classes'
+import { prisma } from '@/system'
 
 export const publicGetAllUserService = async () => {
   const allUser = await prisma.user.findMany()

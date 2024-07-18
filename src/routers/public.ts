@@ -1,5 +1,5 @@
-import { publicGetAllUserService } from '@/services/public'
-import { handleResData } from '@/utils/dataHandlers'
+import { publicGetAllUserService } from '@/services'
+import { handleResData } from '@/utils'
 import { Hono } from 'hono'
 
 const router = new Hono()

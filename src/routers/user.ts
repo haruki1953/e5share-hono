@@ -1,17 +1,18 @@
-import { AppError } from '@/classes/errors'
-import { jwtConfig } from '@/config'
-import { userUpdateProfileJson } from '@/schemas/user'
-import { userGetProfileSercive, userUpdateAvatarService, userUpdateProfileService } from '@/services/user'
-import { type UserJwtVariables } from '@/types/jwt'
-import { handleFileInFromData, handleResData } from '@/utils/dataHandlers'
-import { zValWEH } from '@/utils/zValHandlers'
+import { AppError } from '@/classes'
+import { userUpdateProfileJson } from '@/schemas'
+import { userGetProfileSercive, userUpdateProfileService, userUpdateAvatarService } from '@/services'
+import { useAdminSystem } from '@/system'
+import type { UserJwtVariables } from '@/types'
+import { handleResData, zValWEH, handleFileInFromData } from '@/utils'
 import { Hono } from 'hono'
 import { jwt } from 'hono/jwt'
+
+const adminSystem = useAdminSystem()
 
 // make c.get('jwtPayload') have custom type
 const router = new Hono<{ Variables: UserJwtVariables }>()
 
-router.use(jwt({ secret: jwtConfig.secretKey }))
+router.use(jwt({ secret: adminSystem.store.jwtMainSecretKey }))
 
 router.get('/profile', async (c) => {
   const { id } = c.get('jwtPayload')
