@@ -3,18 +3,18 @@ import { authEmailLoginJson, authRegisterJson, authUsernameLoginJson } from '@/s
 import { authLoginService, authRegisterUserService } from '@/services'
 import { handleResData, zValWEH } from '@/utils'
 
-import { useAdminSystem } from '@/system'
-const adminSystem = useAdminSystem()
+// import { useAdminSystem } from '@/system'
+// const adminSystem = useAdminSystem()
 
 const router = new Hono()
 
 // test
-router.get('/test', (c) => {
-  adminSystem.updateInfo(!adminSystem.store.couldRegister)
+// router.get('/test', (c) => {
+//   adminSystem.updateInfo(!adminSystem.store.couldRegister)
 
-  c.status(201)
-  return c.json(handleResData(0, `couldRegister: ${adminSystem.store.couldRegister}`))
-})
+//   c.status(201)
+//   return c.json(handleResData(0, `couldRegister: ${adminSystem.store.couldRegister}`))
+// })
 
 router.post(
   '/register',

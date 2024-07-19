@@ -3,7 +3,7 @@ import { jwtConfig } from '@/config/config'
 import { prisma, useAdminSystem } from '@/system'
 import bcrypt from 'bcryptjs'
 import { sign } from 'hono/jwt'
-import { confirmUsernameNotExists, confirmEmailNotExists, findUniqueUserByUsername, findUniqueUserByEmail } from '.'
+import { confirmUsernameNotExists, confirmEmailNotExists, findUniqueUserByUsername, findUniqueUserByEmail, confirmUserPassword } from './data'
 import { type PromiseType } from '@prisma/client/extension'
 
 const adminSystem = useAdminSystem()
@@ -43,17 +43,6 @@ export const authRegisterUserService = async (
   }).catch(() => {
     throw new AppError('用户创建失败', 500)
   })
-}
-
-// confirm password
-const confirmUserPassword = (
-  user: PromiseType<ReturnType<typeof findUniqueUserByUsername>>,
-  password: string
-) => {
-  const passwordRight: boolean = bcrypt.compareSync(password, user.passwordHash)
-  if (!passwordRight) {
-    throw new AppError('密码错误', 400)
-  }
 }
 
 // generate token

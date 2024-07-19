@@ -16,7 +16,7 @@ export const publicGetAllUserService = async () => {
       contact_info: user.contactInfo,
       bio: user.bio,
       registered_at: user.registeredAt,
-      last_login: user.lastLogin,
+      // last_login: user.lastLogin,
       account_status: user.accountStatus,
       e5_subscription_date: user.e5SubscriptionDate,
       e5_expiration_date: user.e5ExpirationDate,

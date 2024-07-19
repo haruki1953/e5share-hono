@@ -1,12 +1,10 @@
-import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import fs from 'fs/promises'
-import Jimp from 'jimp'
-import { findUniqueUserById } from './data'
+import bcrypt from 'bcryptjs'
+import { confirmEmailNotExists, confirmUserPassword, findUniqueUserById } from './data'
 import { AppError } from '@/classes'
-import { avatarConfig } from '@/config/config'
-import { prisma } from '@/system'
-import { confirmSaveFolderExists } from '@/utils'
+import { prisma, useFileAvatarSystem } from '@/system'
+import { strBeijingToDate } from '@/utils'
+
+const avatarSystem = useFileAvatarSystem()
 
 export const userGetProfileSercive = async (id: number) => {
   const user = await prisma.user.findUnique({
@@ -18,6 +16,10 @@ export const userGetProfileSercive = async (id: number) => {
   if (user == null) {
     throw new AppError('个人信息获取失败：用户不存在', 400)
   }
+  await prisma.user.update({
+    where: { id },
+    data: { lastLogin: new Date() }
+  })
 
   return {
     id: user.id,
@@ -57,44 +59,16 @@ export const userUpdateProfileService = async (
   })
 }
 
-const processAvatar = async (
-  avatarBuffer: ArrayBuffer
-) => {
-  // info for save
-  // create uuid to serve as filename
-  const filename = uuidv4()
-  const saveFileName = `${filename}.jpg`
-  const saveFilePath = path.join(avatarConfig.savePath, saveFileName)
-
-  confirmSaveFolderExists(avatarConfig.savePath)
-
-  try {
-    const inputImage = await Jimp.read(Buffer.from(avatarBuffer))
-
-    // resize and cover
-    inputImage.cover(avatarConfig.size, avatarConfig.size)
-
-    // save as jpg, and set quality
-    await inputImage.quality(avatarConfig.quality).writeAsync(saveFilePath)
-  } catch (err) {
-    // if error, try del saveFilePath
-    fs.unlink(saveFilePath).catch(() => {})
-    throw new AppError('图片处理失败')
-  }
-
-  return saveFileName
-}
-
 export const userUpdateAvatarService = async (
   id: number, avatarBuffer: ArrayBuffer
 ) => {
   // process avatar (will save avatarfile)
-  const avatar = await processAvatar(avatarBuffer)
+  const avatar = await avatarSystem.processAvatar(avatarBuffer)
 
   // delete old avatar
   const user = await findUniqueUserById(id)
   if (user.avatar != null) {
-    fs.unlink(path.join(avatarConfig.savePath, user.avatar)).catch(() => {})
+    avatarSystem.delAvatar(user.avatar).catch(() => {})
   }
 
   // database update avatar
@@ -104,4 +78,66 @@ export const userUpdateAvatarService = async (
   }).catch(() => {
     throw new AppError('图片处理失败')
   })
+}
+
+export const userUpdateEmailSercive = async (
+  id: number, email: string
+) => {
+  await confirmEmailNotExists(email)
+
+  await prisma.user.update({
+    where: { id },
+    data: { email }
+  })
+}
+
+export const userUpdatePasswordSercive = async (
+  id: number, oldPassword: string, newPassword: string
+) => {
+  const user = await findUniqueUserById(id)
+  confirmUserPassword(user, oldPassword)
+
+  const passwordHash = bcrypt.hashSync(newPassword, 10)
+
+  await prisma.user.update({
+    where: { id },
+    data: { passwordHash }
+  })
+}
+
+export const userUpdateE5infoSercive = async (
+  id: number, subscriptionDate: string, expirationDate: string
+) => {
+  // 不能为同一天
+  if (subscriptionDate === expirationDate) {
+    throw new AppError('到期日期与订阅日期不能是同一天', 400)
+  }
+
+  const on2dateError = () => {
+    throw new AppError('参数错误 | 日期无效')
+  }
+  const subDate = await strBeijingToDate(subscriptionDate).catch(on2dateError)
+  const expDate = await strBeijingToDate(expirationDate).catch(on2dateError)
+
+  // 检查 expDate 是否早于 subDate
+  if (expDate < subDate) {
+    throw new AppError('到期日期不能早于订阅日期', 400)
+  }
+
+  // update
+  await prisma.user.update({
+    where: { id },
+    data: {
+      e5SubscriptionDate: subDate,
+      e5ExpirationDate: expDate
+    }
+  })
+}
+
+export const userGetLastloginSercive = async (
+  userId: number
+) => {
+  const user = await findUniqueUserById(userId)
+
+  return user.lastLogin
 }

@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { authRouter, publicRouter, userRouter } from './routers'
+import { authRouter, postRouter, publicRouter, userRouter } from './routers'
 import { handleResData, handleGlobalError } from './utils'
 
 const app = new Hono()
@@ -12,6 +12,7 @@ app.use(cors())
 app.route('/auth', authRouter)
 app.route('/public', publicRouter)
 app.route('/user', userRouter)
+app.route('/e5post', postRouter)
 
 app.notFound((c) => {
   c.status(404)

@@ -35,3 +35,21 @@ export const authEmailLoginJson = z.object({
 export const userUpdateProfileJson = z.object({
   nickname, contactInfo, bio
 })
+
+export const userUpdateEmailJson = z.object({
+  email
+})
+
+export const userUpdatePasswordJson = z.object({
+  oldPassword: password,
+  newPassword: password
+})
+
+export const userUpdateE5infoJson = z.object({
+  subscriptionDate: z.string(),
+  expirationDate: z.string()
+})
+
+export const userGetLastloginParam = z.object({
+  userId: z.string()
+})

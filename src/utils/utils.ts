@@ -1,6 +1,7 @@
 import { AppError } from '@/classes'
 import crypto from 'crypto'
 import fs from 'fs'
+import moment from 'moment-timezone'
 
 // 生成随机密钥
 export const generateRandomKey = () => {
@@ -16,7 +17,27 @@ export const confirmSaveFolderExists = (dirPath: string) => {
     try {
       fs.mkdirSync(dirPath, { recursive: true })
     } catch (error) {
-      throw new AppError('保存目录错误', 500)
+      throw new AppError(`保存目录错误 ${dirPath}`, 500)
     }
   }
+}
+
+// str to date
+export const strBeijingToDate = async (str: string) => {
+  // 解析日期并设置时区为北京时间
+  const beijingMoment = moment.tz(str, 'Asia/Shanghai').utc()
+  // 检查日期是否有效
+  if (!beijingMoment.isValid()) {
+    throw new AppError('日期无效')
+  }
+  return beijingMoment.toDate()
+}
+
+// str to number
+export const strToNumber = async (str: string) => {
+  const num = parseInt(str)
+  if (isNaN(num)) {
+    throw new AppError('无法解析为数字')
+  }
+  return num
 }
