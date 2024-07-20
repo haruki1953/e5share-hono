@@ -1,6 +1,6 @@
 import { AppError } from '@/classes'
-import { postGetPostsParam } from '@/schemas'
-import { postGetPostsService } from '@/services'
+import { postGetPostsParam, postSendPostJson } from '@/schemas'
+import { postGetPostsService, postSendPostService } from '@/services'
 import { useAdminSystem } from '@/system'
 import { type UserJwtVariables } from '@/types'
 import { handleResData, strToNumber, zValWEH } from '@/utils'
@@ -28,6 +28,20 @@ router.get(
 
     c.status(200)
     return c.json(handleResData(0, '获取成功', data))
+  }
+)
+
+router.post(
+  '/post',
+  zValWEH('json', postSendPostJson),
+  async (c) => {
+    const { id } = c.get('jwtPayload')
+    const { e5id, content } = c.req.valid('json')
+
+    await postSendPostService(id, e5id, content)
+
+    c.status(200)
+    return c.json(handleResData(0, '发送成功'))
   }
 )
 

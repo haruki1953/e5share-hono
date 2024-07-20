@@ -2,7 +2,7 @@ import fs from 'fs'
 import { adminContact, systemAdminConfig, systemDataPath } from '@/config'
 import type { AdminStore } from '@/types'
 import { AppError } from '@/classes'
-import { typesAdminStoreSchemas } from '@/schemas'
+import { typesAdminStoreSchema } from '@/schemas'
 import { confirmSaveFolderExists, generateRandomKey } from '@/utils'
 
 export const useAdminSystem = () => {
@@ -50,7 +50,7 @@ const setup = () => {
 const load = () => {
   const dataJson = fs.readFileSync(filePath, 'utf8')
   const dataObj = JSON.parse(dataJson)
-  store = typesAdminStoreSchemas.parse(dataObj)
+  store = typesAdminStoreSchema.parse(dataObj)
 }
 
 const save = () => {
