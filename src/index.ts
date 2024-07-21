@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { authRouter, postRouter, publicRouter, userRouter } from './routers'
 import { handleResData, handleGlobalError } from './utils'
+import { httpPort } from './config'
 
 const app = new Hono()
 
@@ -22,15 +23,8 @@ app.notFound((c) => {
 // global error handler
 app.onError(handleGlobalError)
 
-// get backend port from env
-let port = Number(process.env.E5SHARE_HONO_PORT)
-// default port
-if (Number.isNaN(port)) {
-  port = 3007
-}
-
-console.log(`Server is running on port ${port}`)
+console.log(`Server is running on port ${httpPort}`)
 serve({
   fetch: app.fetch,
-  port
+  port: httpPort
 })

@@ -1,11 +1,13 @@
 import { AppError } from '@/classes'
-import { prisma } from '@/system'
+import { prisma, useWsSystem } from '@/system'
 import { findUniqueUserById } from './data'
 import { accountStatus } from '@/config'
 import { z } from 'zod'
 import { typesE5PostSchema } from '@/schemas'
 import { v4 as uuidv4 } from 'uuid'
-import { type E5Post } from '@/types/types'
+import { type E5Post } from '@/types'
+
+const wsSystem = useWsSystem()
 
 // Api Service
 export const postGetPostsService = async (
@@ -21,6 +23,8 @@ export const postSendPostService = async (
   await confirmPostAccessPermission(userId, e5id)
 
   await addE5PostToEPDB(e5id, { userId, content })
+
+  wsSystem.sendUpdateE5postMessage(userId, e5id)
 }
 
 // base func
